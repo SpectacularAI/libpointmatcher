@@ -46,13 +46,13 @@ struct SamplingSurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPoints
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
-	
+
 	typedef typename PointMatcher<T>::Vector Vector;
-	typedef typename PointMatcher<T>::Matrix Matrix;	
+	typedef typename PointMatcher<T>::Matrix Matrix;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-	
-	
+
+
 	inline static const std::string description()
 	{
 		return "Subsampling, Normals. This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
@@ -71,17 +71,17 @@ struct SamplingSurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPoints
 			{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"}
 		};
 	}
-	
+
 	const T ratio;
 	const unsigned knn;
-	const unsigned samplingMethod; 
+	const unsigned samplingMethod;
 	const T maxBoxDim;
 	const bool averageExistingDescriptors;
 	const bool keepNormals;
 	const bool keepDensities;
 	const bool keepEigenValues;
 	const bool keepEigenVectors;
-	
+
 public:
 	SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SamplingSurfaceNormalDataPointsFilter() {}
@@ -92,8 +92,9 @@ protected:
 	struct BuildData
 	{
 		typedef std::vector<int> Indices;
-		typedef typename DataPoints::View View;
-		
+		// copy, unlike in the original previous version
+		typedef typename PointMatcher<T>::Matrix View;
+
 		Indices indices;
 		Indices indicesToKeep;
 		Matrix& features;
@@ -116,7 +117,7 @@ protected:
 				indices.push_back(i);
 		}
 	};
-	
+
 	struct CompareDim
 	{
 		const int dim;
@@ -128,7 +129,7 @@ protected:
 					buildData.features(dim, p1);
 		}
 	};
-	
+
 protected:
 	void buildNew(BuildData& data, const int first, const int last, Vector&& minValues, Vector&& maxValues) const;
 	void fuseRange(BuildData& data, const int first, const int last) const;

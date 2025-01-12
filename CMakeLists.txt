@@ -122,14 +122,6 @@ else()
 endif()
 
 #--------------------
-# DEPENDENCY:  boost
-#--------------------
-find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
-if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
-endif ()
-
-#--------------------
 # DEPENDENCY: eigen 3
 #--------------------
 find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
@@ -163,7 +155,7 @@ else()
   # (This, plus the use of cmake target properties in libnabo, will also
   # introduce the required include directories, flags, etc.)
 endif()
-# This cmake target alias will be defined by either: 
+# This cmake target alias will be defined by either:
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
 set(libnabo_LIBRARIES libnabo::nabo)
@@ -307,9 +299,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/Transformation.cpp
 	pointmatcher/TransformationChecker.cpp
 	pointmatcher/Inspector.cpp
-	pointmatcher/IO.cpp
 	pointmatcher/IOFunctions.cpp
-	pointmatcher/Bibliography.cpp
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
@@ -334,7 +324,6 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/BoundingBox.cpp
 	pointmatcher/DataPointsFilters/MaxQuantileOnAxis.cpp
 	pointmatcher/DataPointsFilters/MaxDensity.cpp
-	pointmatcher/DataPointsFilters/SurfaceNormal.cpp
 	pointmatcher/DataPointsFilters/SamplingSurfaceNormal.cpp
 	pointmatcher/DataPointsFilters/OrientNormals.cpp
 	pointmatcher/DataPointsFilters/IncidenceAngle.cpp
@@ -346,16 +335,12 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/ObservationDirection.cpp
 	pointmatcher/DataPointsFilters/VoxelGrid.cpp
 	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
-	pointmatcher/DataPointsFilters/Elipsoids.cpp
-	pointmatcher/DataPointsFilters/Gestalt.cpp
 	pointmatcher/DataPointsFilters/OctreeGrid.cpp
 	pointmatcher/DataPointsFilters/NormalSpace.cpp
 	pointmatcher/DataPointsFilters/CovarianceSampling.cpp
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
-	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
-	pointmatcher/DataPointsFilters/Sphericality.cpp
-	pointmatcher/DataPointsFilters/Saliency.cpp	
-	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp	
+	pointmatcher/DataPointsFilters/Saliency.cpp
+	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
 )
 
 

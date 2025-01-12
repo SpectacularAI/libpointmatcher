@@ -35,20 +35,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcherPrivate.h"
 
 #include "Histogram.h"
+#include "Parametrizable.h"
 
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <limits>
 #include <algorithm>
-#include <boost/format.hpp>
 
 namespace PointMatcherSupport
 {
 	using namespace std;
-	
+
 	template<typename T>
-	Histogram<T>::Histogram(const size_t binCount, const std::string& name, const std::string& 
+	Histogram<T>::Histogram(const size_t binCount, const std::string& name, const std::string&
 		filePrefix, const bool dumpStdErrOnExit):
 		binCount(binCount),
 		name(name),
@@ -56,7 +56,7 @@ namespace PointMatcherSupport
 		dumpStdErrOnExit(dumpStdErrOnExit)
 	{
 	}
-	
+
 	template<typename T>
 	Histogram<T>::~Histogram()
 	{
@@ -64,9 +64,9 @@ namespace PointMatcherSupport
 		uint64_t maxBinC;
 		if (!dumpStdErrOnExit && filePrefix.empty())
 			return;
-			
+
 		const vector<uint64_t> bins(computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, maxBinC));
-		
+
 		if (!filePrefix.empty())
 		{
 			LOG_INFO_STREAM("writing to " << (filePrefix + name + "Stats.csv"));
@@ -80,7 +80,7 @@ namespace PointMatcherSupport
 			for (size_t i = 0; i < this->size(); ++i)
 				ofs << ((*this)[i]) << "\n";
 		}
-		
+
 		if (dumpStdErrOnExit)
 		{
 			std::cerr.precision(4);
@@ -105,13 +105,13 @@ namespace PointMatcherSupport
 			}
 		}
 	}
-	
+
 	template<typename T>
 	vector<uint64_t> Histogram<T>::computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t& maxBinC)
 	{
 		typedef typename std::vector<T>::iterator Iterator;
 		vector<uint64_t> bins(binCount, 0);
-		
+
 		//assert(this->size() > 0);
 		if(this->size() > 0)
 		{
@@ -171,7 +171,7 @@ namespace PointMatcherSupport
 		}
 		return bins;
 	}
-	
+
 	template<typename T>
 	void Histogram<T>::dumpStats(std::ostream& os)
 	{
@@ -179,12 +179,12 @@ namespace PointMatcherSupport
 		uint64_t maxBinC;
 		const vector<uint64_t> bins(computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, maxBinC));
 		os << this->size() << ", " << meanV << ", " << varV << ", " << medianV << ", " << lowQt << ", " << highQt << ", " << minV << ", " << maxV << ", " << binCount << ", ";
-		
+
 		for (size_t i = 0; i < binCount; ++i)
 			os << bins[i] << ", ";
 		os << maxBinC;
 	}
-	
+
 	template<typename T>
 	void Histogram<T>::dumpStatsHeader(std::ostream& os) const
 	{
@@ -201,7 +201,7 @@ namespace PointMatcherSupport
 			os << (boost::format("%1%_bin_%2%,") % name % i).str();
 		os << name + "_max_elements_per_bin ";
 	}
-	
+
 	template struct Histogram<unsigned>;
 	template struct Histogram<float>;
 	template struct Histogram<double>;

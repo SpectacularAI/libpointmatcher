@@ -34,19 +34,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Parametrizable.h"
+#include "IOFunctions.h"
+#ifdef USE_BOOST
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
+#endif
 #include <string>
 
 namespace PointMatcherSupport
 {
+	namespace {
+		const int one = 1;
+	}
+	const bool isBigEndian = *reinterpret_cast<const unsigned char*>(&one) == static_cast<unsigned char>(0);
+	const int oneBigEndian = isBigEndian ? 1 : 1 << 8 * (sizeof(int) - 1);
+
 	using namespace std;
-	
+
 	//! Construct an invalid-parameter exception
 	Parametrizable::InvalidParameter::InvalidParameter(const std::string& reason):
 		runtime_error(reason)
 	{}
-	
+
 	//! Dump the documentation of this parameter to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParameterDoc& p)
 	{
@@ -57,14 +66,14 @@ namespace PointMatcherSupport
 			o << " - max: " << p.maxValue;
 		return o;
 	}
-	
+
 	//! Dump the documentation of this object to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable& p)
 	{
 		o << p.parametersDoc;
 		return o;
 	}
-	
+
 	//! Dump the documentation of these parameters to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p)
 	{
@@ -72,52 +81,52 @@ namespace PointMatcherSupport
 			o << "- " << *it << endl;
 		return o;
 	}
-	
+
 	//! Return always false
 	bool FalseLexicalComparison(std::string, std::string)
 	{
 		return false;
 	}
-	
+
 	/*template<typename S>
 	bool ScalarLexicalComparison(std::string a, std::string b)
 	{
 		return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
 	}
-	
+
 	Uncomment once most people have gcc >= 4.5
 	Shame on bug  9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050)
 	template<typename S>
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue, const S minValue, const S maxValue):
 		name(name),
 		doc(doc),
-		defaultValue(boost::lexical_cast<string>(defaultValue)), 
-		minValue(boost::lexical_cast<string>(minValue)), 
+		defaultValue(boost::lexical_cast<string>(defaultValue)),
+		minValue(boost::lexical_cast<string>(minValue)),
 		maxValue(boost::lexical_cast<string>(maxValue)),
 		comp(ScalarLexicalComparison<S>)
 	{}
-	
+
 	template<typename S>
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue):
 		name(name),
 		doc(doc),
-		defaultValue(boost::lexical_cast<string>(defaultValue)), 
-		minValue(""), 
+		defaultValue(boost::lexical_cast<string>(defaultValue)),
+		minValue(""),
 		maxValue(""),
 		comp(TrueLexicalComparison)
 	{}
 	*/
-	
+
 	//! Construct a parameter documentation with bounds
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue, const std::string& minValue, const std::string& maxValue, LexicalComparison comp):
 		name(name),
 		doc(doc),
-		defaultValue(defaultValue), 
-		minValue(minValue), 
+		defaultValue(defaultValue),
+		minValue(minValue),
 		maxValue(maxValue),
 		comp(comp)
 	{}
-	
+
 	//! Construct a parameter documentation without bounds
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue):
 		name(name),
@@ -127,20 +136,20 @@ namespace PointMatcherSupport
 		maxValue(""),
 		comp(FalseLexicalComparison)
 	{}
-	
+
 	//! Construct a documentation of parameters from a description in the source
 	/*ParametersDoc(const std::vector<ParameterDoc>& list):
 		std::vector<ParameterDoc>(list)
 	{}*/
-	
+
 	/*
 	Again, not used because fo gcc bug 9050
-	
+
 	template<typename S>
 	Parametrizable::Parameter::Parameter(const S value):
 		std::string(boost::lexical_cast<string>(value))
 	{}
-	
+
 	// force instantiation of constructors
 	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int);
 	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float);
@@ -148,11 +157,11 @@ namespace PointMatcherSupport
 	template Parametrizable::ParameterDoc::ParameterDoc<bool>(const std::string, const std::string, const bool);
 	template Parametrizable::ParameterDoc::ParameterDoc<std::string>(const std::string, const std::string, const std::string);
 	template Parametrizable::ParameterDoc::ParameterDoc<const char*>(const std::string, const std::string, const char*);
-	
+
 	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int, const int, const int);
 	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float, const float, const float);
 	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double, const double, const double);
-	
+
 	template Parametrizable::Parameter::Parameter<int>(const int);
 	template Parametrizable::Parameter::Parameter<float>(const float);
 	template Parametrizable::Parameter::Parameter<double>(const double);
@@ -160,12 +169,12 @@ namespace PointMatcherSupport
 	template Parametrizable::Parameter::Parameter<std::string>(const std::string);
 
 	*/
-	
+
 	//! Construct an unknown class without parameters
 	Parametrizable::Parametrizable():
 		className("unknown")
 	{}
-	
+
 	//! Construct with documented parameters
 	Parametrizable::Parametrizable(
 		const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
@@ -190,7 +199,7 @@ namespace PointMatcherSupport
 				parameters[paramName] = it->defaultValue;
 		}
 	}
-	
+
 	//! Virtual destructor, do nothing
 	Parametrizable::~Parametrizable()
 	{}

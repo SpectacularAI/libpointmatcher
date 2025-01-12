@@ -41,16 +41,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #endif // WIN32
 
-#ifdef _POSIX_TIMERS
+#if defined(_POSIX_TIMERS) || !defined(USE_BOOST)
 namespace PointMatcherSupport
 {
 	/**
 		High-precision timer class, using clock_gettime() or clock_get_time()
-		
+
 		The interface is a subset of the one boost::timer provides,
 		but the implementation is much more precise
 		on systems where clock() has low precision, such as glibc.
-		
+
 		This code gets compiled if _POSIX_TIMERS is set,
 		generally in time.h or unistd.h
 	*/
@@ -58,7 +58,7 @@ namespace PointMatcherSupport
 	{
 		//! 64-bit time
 		typedef unsigned long long Time;
-		
+
 		//! Create and start the timer
 		timer();
 		//! Restart the counter
@@ -69,7 +69,7 @@ namespace PointMatcherSupport
 	private:
 		//! Return time at call
 		Time curTime() const;
-		
+
 		Time _start_time; //! time when counter started
 	};
 } // namespace PointMatcherSupport

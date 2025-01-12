@@ -38,9 +38,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include "PointMatcher.h"
+
+#ifdef USE_BOOST
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
-
+#endif
 
 #ifdef SYSTEM_YAML_CPP
 	namespace YAML

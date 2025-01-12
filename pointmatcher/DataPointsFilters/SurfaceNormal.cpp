@@ -41,8 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcherPrivate.h"
 #include "IO.h"
 #include "MatchersImpl.h"
-
-#include <boost/format.hpp>
+#include "Parametrizable.h"
 
 #include "DataPointsFilters/utils/utils.h"
 
@@ -151,9 +150,9 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	using namespace PointMatcherSupport;
 	// Build kd-tree
 	Parametrizable::Parameters param;
-	boost::assign::insert(param) ( "knn", toParam(knn) );
-	boost::assign::insert(param) ( "epsilon", toParam(epsilon) );
-	boost::assign::insert(param) ( "maxDist", toParam(maxDist) );
+	param["knn"] = toParam(knn);
+	param["epsilon"] = toParam(epsilon);
+	param["maxDist"] = toParam(maxDist);
 
 	KDTreeMatcher matcher(param);
 	matcher.init(cloud);
@@ -223,7 +222,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 				normals->col(i) = eigenVe.col(0);
 			else
 				normals->col(i) = computeNormal<T>(eigenVa, eigenVe);
-			
+
 			// clamp normals to [-1,1] to handle approximation errors
 			normals->col(i) = normals->col(i).cwiseMax(-1.0).cwiseMin(1.0);
 		}

@@ -62,8 +62,8 @@ PointMatcher<T>::PointMatcher()
 {
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, RigidTransformation, typename TransformationsImpl<T>::RigidTransformation)
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename TransformationsImpl<T>::PureTranslation)
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, SimilarityTransformation, typename TransformationsImpl<T>::SimilarityTransformation)	
-	
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, SimilarityTransformation, typename TransformationsImpl<T>::SimilarityTransformation)
+
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter, typename DataPointsFiltersImpl<T>::IdentityDataPointsFilter)
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, RemoveNaNDataPointsFilter, typename DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDistDataPointsFilter)
@@ -71,8 +71,6 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, BoundingBoxDataPointsFilter, typename DataPointsFiltersImpl<T>::BoundingBoxDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, OrientNormalsDataPointsFilter, typename DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter)
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IncidenceAngleDataPointsFilter, typename DataPointsFiltersImpl<T>::IncidenceAngleDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter)
@@ -83,21 +81,25 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, ObservationDirectionDataPointsFilter, typename DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CutAtDescriptorThresholdDataPointsFilter, typename DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, ElipsoidsDataPointsFilter, typename DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, GestaltDataPointsFilter, typename DataPointsFiltersImpl<T>::GestaltDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, OctreeGridDataPointsFilter, typename DataPointsFiltersImpl<T>::OctreeGridDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, NormalSpaceDataPointsFilter, typename DataPointsFiltersImpl<T>::NormalSpaceDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CovarianceSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::CovarianceSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, DistanceLimitDataPointsFilter, typename DataPointsFiltersImpl<T>::DistanceLimitDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, RemoveSensorBiasDataPointsFilter, typename DataPointsFiltersImpl<T>::RemoveSensorBiasDataPointsFilter)
-    ADD_TO_REGISTRAR(DataPointsFilter, SphericalityDataPointsFilter, typename DataPointsFiltersImpl<T>::SphericalityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SaliencyDataPointsFilter, typename DataPointsFiltersImpl<T>::SaliencyDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SpectralDecompositionDataPointsFilter, typename DataPointsFiltersImpl<T>::SpectralDecompositionDataPointsFilter)
-	
+	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter)
+#ifdef USE_BOOST
+	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, GestaltDataPointsFilter, typename DataPointsFiltersImpl<T>::GestaltDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, ElipsoidsDataPointsFilter, typename DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, RemoveSensorBiasDataPointsFilter, typename DataPointsFiltersImpl<T>::RemoveSensorBiasDataPointsFilter)
+    ADD_TO_REGISTRAR(DataPointsFilter, SphericalityDataPointsFilter, typename DataPointsFiltersImpl<T>::SphericalityDataPointsFilter)
+#endif
+
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeVarDistMatcher, typename MatchersImpl<T>::KDTreeVarDistMatcher)
-	
+
 	ADD_TO_REGISTRAR_NO_PARAM(OutlierFilter, NullOutlierFilter, typename OutlierFiltersImpl<T>::NullOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, MaxDistOutlierFilter, typename OutlierFiltersImpl<T>::MaxDistOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, MinDistOutlierFilter, typename OutlierFiltersImpl<T>::MinDistOutlierFilter)
@@ -107,22 +109,22 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(OutlierFilter, SurfaceNormalOutlierFilter, typename OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, GenericDescriptorOutlierFilter, typename OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, RobustOutlierFilter, typename OutlierFiltersImpl<T>::RobustOutlierFilter)
-	
+
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer, typename ErrorMinimizersImpl<T>::IdentityErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointSimilarityErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPointWithCovErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneWithCovErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer)
-	
+
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker, typename TransformationCheckersImpl<T>::CounterTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, DifferentialTransformationChecker, typename TransformationCheckersImpl<T>::DifferentialTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker, typename TransformationCheckersImpl<T>::BoundTransformationChecker)
-	
+
 	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector, typename InspectorsImpl<T>::NullInspector)
 	ADD_TO_REGISTRAR(Inspector, PerformanceInspector, typename InspectorsImpl<T>::PerformanceInspector)
 	ADD_TO_REGISTRAR(Inspector, VTKFileInspector, typename InspectorsImpl<T>::VTKFileInspector)
-	
+
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger, NullLogger)
 	ADD_TO_REGISTRAR(Logger, FileLogger, FileLogger)
 }

@@ -35,11 +35,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SimpleSensorNoise.h"
 
 #include "PointMatcherPrivate.h"
+#include "Parametrizable.h"
 
 #include <string>
 #include <vector>
-
-#include <boost/format.hpp>
 
 // SimpleSensorNoiseDataPointsFilter
 // Constructor
@@ -67,7 +66,7 @@ SimpleSensorNoiseDataPointsFilter<T>::SimpleSensorNoiseDataPointsFilter(const Pa
 // SimpleSensorNoiseDataPointsFilter
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints 
+typename PointMatcher<T>::DataPoints
 SimpleSensorNoiseDataPointsFilter<T>::filter(const DataPoints& input)
 {
 	DataPoints output(input);
@@ -119,7 +118,7 @@ void SimpleSensorNoiseDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 }
 
 template<typename T>
-typename PointMatcher<T>::Matrix 
+typename PointMatcher<T>::Matrix
 SimpleSensorNoiseDataPointsFilter<T>::computeLaserNoise(
 	const T minRadius, const T beamAngle, const T beamConst, const Matrix& features)
 {

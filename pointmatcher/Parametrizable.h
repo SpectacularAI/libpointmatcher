@@ -41,26 +41,117 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 #include <string>
+
+#ifdef USE_BOOST
 #include <boost/lexical_cast.hpp>
-#include <limits>
 #define BOOST_ASSIGN_MAX_PARAMS 6
 #include <boost/assign/list_inserter.hpp>
+#else
+#include <Eigen/Core>
+#include <sstream>
+#define BOOST_AUTO(a, b) auto a = b
 
+#include <mutex>
+namespace boost {
+struct mutex : public std::mutex {
+	using scoped_lock = std::unique_lock<boost::mutex>;
+};
+
+template <class T>
+class optional {
+private:
+	bool valid = false;
+	T value;
+
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+	optional(const T &t) : valid(true), value(t) {}
+	optional() : valid(false), value() {}
+
+	const T& get() const {
+		return value;
+	}
+
+	T& get() {
+		return value;
+	}
+
+	operator bool() const {
+		return valid;
+	}
+
+	const T* operator->() const {
+		return &value;
+	}
+
+	T* operator->() {
+		return &value;
+	}
+
+	T &operator*() {
+		return value;
+	}
+
+	const T &operator*() const {
+		return value;
+	}
+
+
+	const optional& operator=(const T& v) {
+		value = v;
+		valid = true;
+		return *this;
+	}
+};
+
+class format {
+private:
+	std::string s;
+public:
+	format(const char* fmt) : s(fmt) {}
+	template<typename T>
+	format operator%(const T& t) {
+		std::ostringstream oss;
+		oss << s << " " << t;
+		s = oss.str();
+		return *this;
+	}
+	std::string str() const { return s; }
+};
+}
+
+#endif
+#include <limits>
 
 namespace PointMatcherSupport
-{	
+{
+#ifndef USE_BOOST
+	template<typename Target>
+	inline Target lexical_cast_sstream(const std::string& arg) {
+		Target result;
+		std::istringstream(arg) >> result;
+		return result;
+	}
+#endif
+
 	//! A lexical casting function that is an improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
 	template<typename Target>
 	inline Target lexical_cast_scalar_to_string(const std::string& arg)
 	{
-		if (arg == "inf")
+		if (arg == "inf" || arg == "+inf")
 			return std::numeric_limits<Target>::infinity();
 		else if (arg == "-inf")
 			return -std::numeric_limits<Target>::infinity();
 		else if (arg == "nan")
 			return std::numeric_limits<Target>::quiet_NaN();
-		else
+		else {
+#ifdef USE_BOOST
 			return boost::lexical_cast<Target>(arg);
+#else
+			return lexical_cast_sstream<Target>(arg);
+#endif
+		}
 	}
 
 	//! Overloaded function for convenience
@@ -70,30 +161,51 @@ namespace PointMatcherSupport
 		return lexical_cast_scalar_to_string<Target>(std::string(arg));
 	}
 
-	
 	//! General case of lexical cast, use boost
 	template<typename Target, typename Source>
 	inline Target lexical_cast(const Source& arg)
 	{
+#ifdef USE_BOOST
 		return boost::lexical_cast<Target>(arg);
+#else
+		return static_cast<Target>(arg);
+#endif
 	}
-	
+
 	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline float lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<float>(arg); }
 	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline double lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<double>(arg); }
-	
+#ifndef USE_BOOST
+	template<>
+	inline unsigned lexical_cast(const std::string& arg) { return lexical_cast_sstream<unsigned>(arg); }
+	template<>
+	inline unsigned long lexical_cast(const std::string& arg) { return lexical_cast_sstream<unsigned long>(arg); }
+	template<>
+	inline int lexical_cast(const std::string& arg) { return lexical_cast_sstream<int>(arg); }
+	template<>
+	inline unsigned char lexical_cast(const std::string& arg) {
+		return lexical_cast_sstream<int>(arg);
+		//if (arg.size() != 1) throw std::runtime_error("invalid string len");
+		//return arg[0];
+	}
+	template<>
+	inline bool lexical_cast(const std::string& arg) {
+		return arg.size() > 0 && (arg[0] == 't' || arg[0] == 'T' || arg[0] == '1');
+	}
+#endif
+
 	//
-	
+
 	//! Return the a string value using lexical_cast
 	template<typename S>
 	std::string toParam(const S& value)
 	{
 		return lexical_cast<std::string>(value);
 	}
-	
+
 	//! The superclass of classes that are constructed using generic parameters. This class provides the parameter storage and fetching mechanism
 	struct Parametrizable
 	{
@@ -102,17 +214,17 @@ namespace PointMatcherSupport
 		{
 			InvalidParameter(const std::string& reason);
 		};
-		
+
 		//! A function that returns whether a is smaller than b
 		typedef bool(*LexicalComparison)(std::string a, std::string b);
-		
+
 		//! Return whether a < b, lexically casted to S
 		template<typename S>
 		static bool Comp(std::string a, std::string b)
 		{
 			return lexical_cast<S>(a) < lexical_cast<S>(b);
 		}
-		
+
 		//! The documentation of a parameter
 		struct ParameterDoc
 		{
@@ -122,13 +234,13 @@ namespace PointMatcherSupport
 			std::string minValue; //!< if bounds are checked, minimum value
 			std::string maxValue; //!< if bounds are checked, maxmimu value
 			LexicalComparison comp; //!< pointer to comparison function
-			
+
 			/*
 			This code is beautiful, this code is correct, this code does not work ;-(
 			Blame gcc bug 9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050), shame
 			on them forever and beyond. People being laaaazzzy adopters, I'm forced to use
 			something that works on gcc 4.4.
-			
+
 			template<typename S>
 			ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
 			template<typename S>
@@ -136,13 +248,13 @@ namespace PointMatcherSupport
 			*/
 			ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue, const std::string& minValue, const std::string& maxValue, LexicalComparison comp);
 			ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue);
-			
+
 			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};
-		
+
 		//! The documentation of all parameters
 		typedef std::vector<ParameterDoc> ParametersDoc;
-		
+
 		/*
 		Again, not used because fo gcc bug 9050
 		struct Parameter: public std::string
@@ -155,22 +267,22 @@ namespace PointMatcherSupport
 		typedef std::string Parameter; //!< alias
 		typedef std::map<std::string, Parameter> Parameters; //!< Parameters stored as a map of string->string
 		typedef std::set<std::string> ParametersUsed; //!< Parameters whose value has been read
-		
+
 		const std::string className; //!< name of the class
 		const ParametersDoc parametersDoc; //!< documentation of parameters
 		Parameters parameters; //!< parameters with their values encoded in string
 		ParametersUsed parametersUsed; //!< parameters whose value has actually been read
-		
+
 		Parametrizable();
 		Parametrizable(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Parametrizable();
-		
+
 		std::string getParamValueString(const std::string& paramName);
-		
+
 		//! Return the value of paramName, lexically-casted to S
 		template<typename S>
 		S get(const std::string& paramName) { return lexical_cast<S>(getParamValueString(paramName)); }
-		
+
 		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p);
 	};
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p);
