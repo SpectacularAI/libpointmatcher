@@ -41,12 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <set>
 #include <string>
+#include <limits>
 
-#ifdef USE_BOOST
-#include <boost/lexical_cast.hpp>
-#define BOOST_ASSIGN_MAX_PARAMS 6
-#include <boost/assign/list_inserter.hpp>
-#else
 #include <Eigen/Core>
 #include <sstream>
 #define BOOST_AUTO(a, b) auto a = b
@@ -121,19 +117,15 @@ public:
 };
 }
 
-#endif
-#include <limits>
 
 namespace PointMatcherSupport
 {
-#ifndef USE_BOOST
 	template<typename Target>
 	inline Target lexical_cast_sstream(const std::string& arg) {
 		Target result;
 		std::istringstream(arg) >> result;
 		return result;
 	}
-#endif
 
 	//! A lexical casting function that is an improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
 	template<typename Target>
@@ -146,11 +138,7 @@ namespace PointMatcherSupport
 		else if (arg == "nan")
 			return std::numeric_limits<Target>::quiet_NaN();
 		else {
-#ifdef USE_BOOST
-			return boost::lexical_cast<Target>(arg);
-#else
 			return lexical_cast_sstream<Target>(arg);
-#endif
 		}
 	}
 
@@ -165,12 +153,11 @@ namespace PointMatcherSupport
 	template<typename Target, typename Source>
 	inline Target lexical_cast(const Source& arg)
 	{
-#ifdef USE_BOOST
-		return boost::lexical_cast<Target>(arg);
-#else
-		return static_cast<Target>(arg);
-#endif
+		return Target::sfinae_failure;
 	}
+
+	template<>
+	inline std::string lexical_cast(const std::string& arg) { return arg; }
 
 	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
@@ -178,24 +165,21 @@ namespace PointMatcherSupport
 	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline double lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<double>(arg); }
-#ifndef USE_BOOST
-	template<>
-	inline unsigned lexical_cast(const std::string& arg) { return lexical_cast_sstream<unsigned>(arg); }
-	template<>
-	inline unsigned long lexical_cast(const std::string& arg) { return lexical_cast_sstream<unsigned long>(arg); }
-	template<>
-	inline int lexical_cast(const std::string& arg) { return lexical_cast_sstream<int>(arg); }
-	template<>
-	inline unsigned char lexical_cast(const std::string& arg) {
-		return lexical_cast_sstream<int>(arg);
-		//if (arg.size() != 1) throw std::runtime_error("invalid string len");
-		//return arg[0];
-	}
+
+#define X(x) template<> inline x lexical_cast(const std::string& arg) { return lexical_cast_sstream<x>(arg); }
+	X(unsigned char)
+	X(int)
+	X(unsigned int)
+	X(long)
+	X(unsigned long)
+	X(long long)
+	X(unsigned long long)
+#undef X
+
 	template<>
 	inline bool lexical_cast(const std::string& arg) {
 		return arg.size() > 0 && (arg[0] == 't' || arg[0] == 'T' || arg[0] == '1');
 	}
-#endif
 
 	//
 
